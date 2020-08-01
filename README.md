@@ -1,5 +1,7 @@
 # laomms-call_fastcall_from_csharp
 
+https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make-them-work-together-without-ccli-shellcode
+
 ```c#
     static class FastCall
     {
