@@ -1,57 +1,28 @@
 # laomms-call_fastcall_from_csharp
 
 ```c#
-       static class FastCall
+    static class FastCall
     {
-        public static T CreateToFastcall<T>(IntPtr functionPtr, string patchName) where T : class
+        public static T StdcallToFastcall<T>(IntPtr functionPtr) where T : class
         {
-            var method = typeof(T).GetMethod("Invoke");
-            if (method.GetParameters().Any(param => Marshal.SizeOf(param.ParameterType) != 4))
-                throw new ArgumentException("Only supports functions with 32 bit parameters");
+            var wrapper = new List<byte>();
 
-            var parameterCount = method.GetParameters().Length;
+            wrapper.Add(0x58);          // pop eax  - store the return address
+            wrapper.Add(0x59);          // pop ecx  - move the 1st argument to ecx
+            wrapper.Add(0x5A);          // pop edx  - move the 2nd argument to edx
+            wrapper.Add(0x50);          // push eax - restore the return address
 
-            var payload = new List<byte>();
+            wrapper.Add(0x68);                                                  // push ...
+            wrapper.AddRange(BitConverter.GetBytes(functionPtr.ToInt32()));     // the function address to call
+            wrapper.Add(0xC3);                                                  // ret - and jump to          
 
-            payload.Add(0x55);                                  // push ebp
-            payload.AddRange(new byte[] { 0x89, 0xE5 });        // mov ebp, esp
-            payload.AddRange(new byte[] { 0x8B, 0x4D, 0x08 });  // mov ecx, [ebp+0x08]
-            payload.AddRange(new byte[] { 0x8B, 0x55, 0x0C });  // mov edx, [ebp+0x0C]
+            var wrapperPtr = Marshal.AllocHGlobal(wrapper.Count);
+            Marshal.Copy(wrapper.ToArray(), 0, wrapperPtr, wrapper.Count);
 
-            if (parameterCount > 2)
-                for (var i = 0; i < parameterCount - 2; i++)
-                {
-                    payload.AddRange(new byte[] { 0x8B, 0x5D, (byte)(0x10 + 4*i) });    // mov ebx, [ebp+0x10+4*i]
-                    payload.Add(0x53);                                                  // push ebx
-                }
-
-            var callOpcodeLocation = payload.Count + 1;
-
-            payload.AddRange(new byte[] { 0xE8, 0x00, 0x00, 0x00, 0x00 });  // call function
-
-            if (parameterCount > 2)
-            {
-                payload.AddRange(new byte[] {0x89, 0xEC }); // mov esp, ebp
-                payload.Add(0x5D);                          // pop ebp
-            }
-
-            payload.Add(0xC2);
-            payload.AddRange(BitConverter.GetBytes((ushort)(parameterCount * 4)));     // retn 4 * paramCount
-
-            var payloadPtr = Locator.PayloadSpace(payload.Count);
-
-            var functionCall = functionPtr.ToInt32() - payloadPtr.ToInt32() - callOpcodeLocation - 5;
-
-            // update payload
-            payload[callOpcodeLocation + 0] = (byte)functionCall;
-            payload[callOpcodeLocation + 1] = (byte)(functionCall >> 8);
-            payload[callOpcodeLocation + 2] = (byte)(functionCall >> 16);
-            payload[callOpcodeLocation + 3] = (byte)(functionCall >> 24);
-
-            // deposit payload
-            Patcher.CreatePatch(new Patcher.Patch(payloadPtr, payload.ToArray(), patchName));
-
-            return Utilities.RegisterDelegate<T>(payloadPtr);
+            if (FastCallWrappers == null)
+                FastCallWrappers = new List<IntPtr>();
+            FastCallWrappers.Add(wrapperPtr);
+            return Marshal.GetDelegateForFunctionPointer<T>(wrapperPtr);
         }
 
         public static void RemoveToFastcall(string patchName)
