@@ -8,6 +8,11 @@
 https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make-them-work-together-without-ccli-shellcode
 
 ```c#
+
+   [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+   public delegate bool FastCallDelegate(ref SpellEntry spellRec, ref bool notEnoughPower);
+   IntPtr pFastCall = Fastcall.CreateToFastcall<FastCallDelegate>((IntPtr)0x006E3D60, "FastCall");
+
     static class FastCall
     {
         public static T StdcallToFastcall<T>(IntPtr functionPtr) where T : class
