@@ -10,7 +10,7 @@ __declspec(dllexport) void __stdcall callfunc(int a, int b, int c, int d);
 
 int __cdecl cppcdecl(int a, int b, int c, int d)
 {
-    return cppfastcall(1, 2, 3, 4);
+    return cppfastcall(a, b, c, d);
 }
 
 int __fastcall cppfastcall(int a, int b, int c, int d)
