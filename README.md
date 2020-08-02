@@ -11,7 +11,7 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 
    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
    public delegate bool FastCallDelegate(int a1,int a2,int a3,int a4,int a5);
-   var pFastCall = Fastcall.CreateToFastcall<FastCallDelegate>((IntPtr)0x006E3D60, "FastCall");
+   var pFastCall = Fastcall.StdcallToFastcall<FastCallDelegate>((IntPtr)0x006E3D60);
 
     static class FastCall
     {
