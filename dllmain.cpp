@@ -1,15 +1,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 
-
-
-//extern "C"
-//{
-//    __declspec(dllexport) int __cdecl ccdecl(int a, int b, int c, int d);
-//    __declspec(dllexport) int __fastcall cfastcall(int a, int b, int c, int d);
-//    __declspec(dllexport) int __stdcall cstdcall(int a, int b, int c, int d);
-//}
-
 __declspec(dllexport) int __cdecl cppcdecl(int a, int b, int c, int d);
 __declspec(dllexport) int __fastcall cppfastcall(int a, int b, int c, int d);
 __declspec(dllexport) int __stdcall cppstdcall(int a, int b, int c, int d);
