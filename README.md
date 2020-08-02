@@ -15,7 +15,7 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 
     static class FastCall
     {
-        public static T StdcallToFastcall<T>(IntPtr functionPtr) where T : class
+        public static T StdcallToFastcall<T>(IntPtr functionPtr)
         {
             var wrapper = new List<byte>();
 
@@ -34,7 +34,7 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
             if (FastCallWrappers == null)
                 FastCallWrappers = new List<IntPtr>();
             FastCallWrappers.Add(wrapperPtr);
-            return Marshal.GetDelegateForFunctionPointer<T>(wrapperPtr);
+            return (T)(object)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(T));
         }
 
         public static void RemoveToFastcall(string patchName)
