@@ -1,5 +1,7 @@
 # laomms-call_fastcall_from_csharp
 
+.net无法直接调用C++的fastcall的，但是可以通过变通的方法实现，一种是在目标进程空间申请一块内存，构建一个与fastcall参数一样的stdcall，复制代码到该空间，stdcall主要的处理过程是将参数1和参数2赋值到EDX和ECX，然后再跳到fascall。另一种方法是暴力内存注入，调用fastcall是注入赋值EDX和ECX的值。
+
 https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make-them-work-together-without-ccli-shellcode
 
 ```c#
