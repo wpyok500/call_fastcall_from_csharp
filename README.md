@@ -7,6 +7,25 @@
 
 https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make-them-work-together-without-ccli-shellcode
 
+与标准函数的区别
+```c
+.text:10011618                 push    5               ; int
+.text:1001161A                 push    4               ; int
+.text:1001161C                 push    3               ; int
+.text:1001161E                 push    2               ; int
+.text:10011620                 push    1               ; int
+.text:10011622                 call    cppstdcall(int,int,int,int,int)
+.text:10011627                 mov     [ebp+var_8], eax
+.text:1001162A                 push    5               ; int
+.text:1001162C                 push    4               ; int
+.text:1001162E                 push    3               ; int
+.text:10011630                 mov     edx, 2          ; int
+.text:10011635                 mov     ecx, 1          ; int
+.text:1001163A                 call    cppfastcall(int,int,int,int,int)
+.text:1001163F                 mov     [ebp+var_14], eax
+```
+
+
 ```c#
 
    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
