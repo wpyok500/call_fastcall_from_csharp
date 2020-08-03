@@ -67,6 +67,45 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 ```
 
 ```c#
+            byte[] pFuncAddr = BitConverter.GetBytes(cppfastcallPtr.ToInt32());
+            byte[] patchcode1 = new byte[]
+            {
+                     0x55,//                                            push    ebp
+                     0x8B, 0xEC,//                                      mov     ebp, esp
+                     0x81 , 0xEC , 0xC0 , 0x00 , 0x00 , 0x00,//         sub     esp, 0C0h
+                     0x53,//                                            push    ebx
+                     0x56,//                                            push    esi
+                     0x57,//                                            push    edi
+                     0x8D , 0xBD , 0x40 , 0xFF , 0xFF , 0xFF,//         lea     edi, [ebp + var_C0]
+                     0x8B , 0x45 , 0x18,//                              mov eax, [ebp + arg_10]
+                     0x50,//                                            push eax; int
+                     0x8B , 0x4D , 0x14,//                              mov ecx, [ebp + arg_C]
+                     0x51,//                                            push ecx; int
+                     0x8B , 0x55 , 0x10,//                              mov edx, [ebp + arg_8]
+                     0x52,//                                            push edx; int
+                     0x8B , 0x55 , 0x0C,//                              mov     edx, [ebp+arg_4] ; int
+                     0x8B , 0x4D , 0x08,//                              mov ecx, [ebp + arg_0]; int
+                     0xE8 //                                            call    cppfastcall//10011710
+            };
+            byte[] patchcode2 = new byte[]
+            {
+                     0x5F,//                                            pop edi
+                     0x5E,//                                            pop esi
+                     0x5B,//                                            pop ebx
+                     0x81 , 0xC4 , 0xC0 , 0x00 , 0x00 , 0x00,//         add esp, 0C0h
+                     0x3B ,0xEC,//                                      cmp ebp, esp
+                     0x8B ,0xE5,//                                      mov esp, ebp
+                     0x5D,//                                            pop ebp
+                     0xC3//                                             retn
+             };
+
+            byte[] patch_bytes = patchcode1.Concat(pFuncAddr).Concat(patchcode2).ToArray();
+```
+
+
+网上的一些例子
+
+```c#
 
    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
    public delegate bool FastCallDelegate(int a1,int a2,int a3,int a4,int a5);
