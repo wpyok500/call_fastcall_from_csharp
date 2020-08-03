@@ -102,10 +102,10 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
             byte[] patch_bytes = patchcode1.Concat(pFuncAddr).Concat(patchcode2).ToArray();
             
             //修改内存属性
-		VirtualProtect(cppfastcallPtr, 1, PAGE_EXECUTE_READWRITE, ref lpflOldProtect))
+	     VirtualProtect(cppfastcallPtr, 1, PAGE_EXECUTE_READWRITE, ref lpflOldProtect))
 
             //读相同长度的原始字节
-                        IntPtr OldEntry = Marshal.AllocHGlobal(patch_bytes.Length); 
+             IntPtr OldEntry = Marshal.AllocHGlobal(patch_bytes.Length); 
 		for (int i = 0; i <= patch_bytes.Length; i++)
 		{
 
@@ -113,7 +113,7 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 
 		}
 
-            //写入自定义代码区
+            //写入自定义代码
             WriteProcessMemory(Hwnd, cppfastcallPtr, patch_bytes, (uint)patch_bytes.Length, IntPtr.Zero);
             
 ```
