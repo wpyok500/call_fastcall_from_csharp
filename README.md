@@ -26,6 +26,50 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 .text:1001163F                 mov     [ebp+var_14], eax
 ```
 
+通过构建一个标准函数去调用fastcall
+```c
+text:100116F0 int __stdcall cppstdcall(int, int, int, int, int) proc near
+.text:100116F0                                         ; CODE XREF: cppstdcall(int,int,int,int,int)↑j
+.text:100116F0
+.text:100116F0 var_C0          = byte ptr -0C0h
+.text:100116F0 arg_0           = dword ptr  8
+.text:100116F0 arg_4           = dword ptr  0Ch
+.text:100116F0 arg_8           = dword ptr  10h
+.text:100116F0 arg_C           = dword ptr  14h
+.text:100116F0 arg_10          = dword ptr  18h
+.text:100116F0
+.text:100116F0                 push    ebp
+.text:100116F1                 mov     ebp, esp
+.text:100116F3                 sub     esp, 0C0h
+.text:100116F9                 push    ebx
+.text:100116FA                 push    esi
+.text:100116FB                 push    edi
+.text:100116FC                 lea     edi, [ebp+var_C0]
+.text:10011702                 mov     ecx, 30h
+.text:10011707                 mov     eax, 0CCCCCCCCh
+.text:1001170C                 rep stosd
+.text:1001170E                 mov     ecx, offset unk_1001B002
+.text:10011713                 call    __CheckForDebuggerJustMyCode(x)
+.text:10011718                 mov     eax, [ebp+arg_10]
+.text:1001171B                 push    eax             ; int
+.text:1001171C                 mov     ecx, [ebp+arg_C]
+.text:1001171F                 push    ecx             ; int
+.text:10011720                 mov     edx, [ebp+arg_8]
+.text:10011723                 push    edx             ; int
+.text:10011724                 mov     edx, [ebp+arg_4] ; int
+.text:10011727                 mov     ecx, [ebp+arg_0] ; int
+.text:1001172A                 call    cppfastcall(int,int,int,int,int)
+.text:1001172F                 pop     edi
+.text:10011730                 pop     esi
+.text:10011731                 pop     ebx
+.text:10011732                 add     esp, 0C0h
+.text:10011738                 cmp     ebp, esp
+.text:1001173A                 call    j___RTC_CheckEsp
+.text:1001173F                 mov     esp, ebp
+.text:10011741                 pop     ebp
+.text:10011742                 retn    14h
+.text:10011742 int __stdcall cppstdcall(int, int, int, int, int) endp
+```
 
 ```c#
 
