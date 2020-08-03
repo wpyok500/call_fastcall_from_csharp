@@ -1,35 +1,19 @@
-// dllmain.cpp : Defines the entry point for the DLL application.
 #include "pch.h"
 
-__declspec(dllexport) int __cdecl cppcdecl(int a, int b, int c, int d);
-__declspec(dllexport) int __fastcall cppfastcall(int a, int b, int c, int d);
-__declspec(dllexport) int __stdcall cppstdcall(int a, int b, int c, int d);
-__declspec(dllexport) void __stdcall callfunc(int a, int b, int c, int d);
+__declspec(dllexport) int __fastcall cppfastcall(int a, int b, int c, int d, int e);
+__declspec(dllexport) int __stdcall cppstdcall(int a, int b, int c, int d, int e);
 
 
-
-int __cdecl cppcdecl(int a, int b, int c, int d)
+int __fastcall cppfastcall(int a, int b, int c, int d, int e)
 {
-    return cppfastcall(a, b, c, d);
+    return (a + b) * c + d+e;
 }
 
-int __fastcall cppfastcall(int a, int b, int c, int d)
+int __stdcall cppstdcall(int a, int b, int c, int d, int e)
 {
-    return (a + b) * c + d;
+    return cppfastcall(a, b, c, d, e);
 }
 
-int __stdcall cppstdcall(int a, int b, int c, int d)
-{
-    return (a + b) * c + d;
-}
-
-void __stdcall callfunc(int a, int b, int c, int d)
-{
-    int a1 = cppstdcall(1, 2, 3, 4);
-    int a2 = cppfastcall(1, 2, 3, 4);
-    int a3 = cppstdcall(1, 2, 3, 4);
-
-}
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -46,4 +30,3 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     return TRUE;
 }
-
