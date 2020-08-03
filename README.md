@@ -15,6 +15,7 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 .text:1001161E                 push    2               ; int
 .text:10011620                 push    1               ; int
 .text:10011622                 call    cppstdcall(int,int,int,int,int)
+
 .text:10011627                 mov     [ebp+var_8], eax
 .text:1001162A                 push    5               ; int
 .text:1001162C                 push    4               ; int
