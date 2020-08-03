@@ -249,4 +249,64 @@ public static class FastCall
         }
         return IntPtr.Zero;
     }
+    
+```
+
+```c#
+    
+    using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using Binarysharp.MemoryManagement;
+using Binarysharp.MemoryManagement.Memory;
+
+namespace LuaExecPOC
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            begin:
+            Console.Write($"Enter process name: ");
+            string processName = Console.ReadLine();
+            Process process = Process.GetProcesses().FirstOrDefault(x => string.Equals(x.ProcessName, processName, StringComparison.CurrentCultureIgnoreCase));
+            if (process == null)
+            {
+                Console.WriteLine("Process not found.");
+                goto begin;
+            }
+
+            try
+            {
+                var wow = new MemorySharp(process);
+                while (true)
+                {
+                    Console.Write("Enter Lua to execute: ");
+                    string lua = Console.ReadLine();
+                    if (lua == null)
+                        continue;
+
+                    RemoteAllocation codeCave = wow.Memory.Allocate(lua.Length + 0x1);
+                    codeCave.WriteString(lua, Encoding.ASCII);
+
+                    wow.Assembly.InjectAndExecute(new[]
+                    {
+                        "mov eax, 0",
+                        "mov ecx, " + codeCave.BaseAddress,
+                        "mov edx, " + codeCave.BaseAddress,
+                        "call 0x704cd0",
+                        "retn"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An exception has occurred. You're probably not running as Administrator.");
+                Console.WriteLine();
+                Console.WriteLine(ex);
+            }
+        }
+    }
+}
 ```
