@@ -67,54 +67,63 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 ```
 
 ```c#
+            IntPtr hDll=LoadLibrary("testdll.dll");         
+            IntPtr cppfastcallPtr = new IntPtr(hDll.ToInt64() + 0x11680);
+
             byte[] pFuncAddr = BitConverter.GetBytes(cppfastcallPtr.ToInt32());
             byte[] patchcode1 = new byte[]
             {
                      0x55,//                                            push    ebp
                      0x8B, 0xEC,//                                      mov     ebp, esp
-                     0x81 , 0xEC , 0xC0 , 0x00 , 0x00 , 0x00,//         sub     esp, 0C0h
+                     0x81, 0xEC, 0xD8, 0x00, 0x00, 0x00,//              sub     esp, 0D8h
                      0x53,//                                            push    ebx
                      0x56,//                                            push    esi
                      0x57,//                                            push    edi
-                     0x8D , 0xBD , 0x40 , 0xFF , 0xFF , 0xFF,//         lea     edi, [ebp + var_C0]
-                     0x8B , 0x45 , 0x18,//                              mov eax, [ebp + arg_10]
+                     0x8D, 0xBD, 0x28, 0xFF, 0xFF, 0xFF,//              lea     edi, [ebp + var_D8]
+                     0x8B, 0x45, 0x18,//                                mov eax, [ebp + arg_10]
                      0x50,//                                            push eax; int
-                     0x8B , 0x4D , 0x14,//                              mov ecx, [ebp + arg_C]
+                     0x8B, 0x4D,0x14,//                                 mov ecx, [ebp + arg_C]
                      0x51,//                                            push ecx; int
-                     0x8B , 0x55 , 0x10,//                              mov edx, [ebp + arg_8]
+                     0x8B, 0x55, 0x10,//                                mov edx, [ebp + arg_8]
                      0x52,//                                            push edx; int
-                     0x8B , 0x55 , 0x0C,//                              mov     edx, [ebp+arg_4] ; int
-                     0x8B , 0x4D , 0x08,//                              mov ecx, [ebp + arg_0]; int
-                     0xE8 //                                            call    cppfastcall//10011710
+                     0x8B, 0x55, 0x0C,//                                mov     edx, [ebp+arg_4] ; int
+                     0x8B, 0x4D, 0x08,//                                mov ecx, [ebp + arg_0]; int
+                     0xE8 //                                            call    cppfastcall//10011680 
             };
             byte[] patchcode2 = new byte[]
             {
+                     0x89, 0x45, 0xEC,//                                mov     [ebp+var_14], eax
                      0x5F,//                                            pop edi
                      0x5E,//                                            pop esi
                      0x5B,//                                            pop ebx
-                     0x81 , 0xC4 , 0xC0 , 0x00 , 0x00 , 0x00,//         add esp, 0C0h
-                     0x3B ,0xEC,//                                      cmp ebp, esp
-                     0x8B ,0xE5,//                                      mov esp, ebp
+                     0x81, 0xC4, 0xD8 , 0x00, 0x00, 0x00,//             add esp, 0D8h
+                     0x3B, 0xEC,//                                      cmp ebp, esp
+                     0x8B, 0xE5,//                                      mov esp, ebp
                      0x5D,//                                            pop ebp
                      0xC3//                                             retn
              };
 
             byte[] patch_bytes = patchcode1.Concat(pFuncAddr).Concat(patchcode2).ToArray();
-            
+
+
+            IntPtr lpAddress = VirtualAllocEx(GetCurrentProcess(), IntPtr.Zero, (uint)patch_bytes.Length, AllocationType.COMMIT, MemoryProtection.READWRITE);
+
             //修改内存属性
-	     VirtualProtect(cppfastcallPtr, 1, PAGE_EXECUTE_READWRITE, ref lpflOldProtect))
+            uint lpflOldProtect = 0;
+            VirtualProtect(lpAddress, new IntPtr(patch_bytes.Length), (uint)MemoryProtection.EXECUTE_READWRITE, ref lpflOldProtect);
 
-            //读相同长度的原始字节
-             IntPtr OldEntry = Marshal.AllocHGlobal(patch_bytes.Length); 
-		for (int i = 0; i <= patch_bytes.Length; i++)
-		{
+            //读相同长度的原始字节保存起来
+            IntPtr OldEntry = Marshal.AllocHGlobal(patch_bytes.Length);
+            for (int i = 0; i <= patch_bytes.Length; i++)
+            {
 
-			Marshal.WriteByte(OldEntry, i, Marshal.ReadByte(cppfastcallPtr, i));
+                Marshal.WriteByte(OldEntry, i, Marshal.ReadByte(cppfastcallPtr, i));
 
-		}
+            }
 
             //写入自定义代码
-            WriteProcessMemory(Hwnd, cppfastcallPtr, patch_bytes, (uint)patch_bytes.Length, IntPtr.Zero);
+            //WriteProcessMemory(GetCurrentProcess(), lpAddress, patch_bytes, (uint)patch_bytes.Length, IntPtr.Zero);
+            Marshal.Copy(patch_bytes.ToArray(), 0, lpAddress, patch_bytes.Length);
             
 ```
 
