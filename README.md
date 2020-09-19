@@ -141,6 +141,7 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
    
     static class FastCall
     {
+        public static List<IntPtr> FastCallWrappers;
         public static T StdcallToFastcall<T>(IntPtr functionPtr)
         {
             var wrapper = new List<byte>();
@@ -165,7 +166,10 @@ https://docs.microsoft.com/zh-cn/archive/blogs/winsdk/c-and-fastcall-how-to-make
 
         public static void RemoveToFastcall(string patchName)
         {
-            Patcher.RemovePatch(patchName);
+            if (FastCallWrappers == null)
+                return;
+            foreach (var p in FastCallWrappers)
+                Marshal.FreeHGlobal(p);
         }
     }     
 
